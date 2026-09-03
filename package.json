@@ -1,0 +1,22 @@
+{
+  "name": "vithum",
+  "version": "1.0.0",
+  "description": "Vulithuba telecom website with a SQLite-backed contact form",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "setup-notifications": "powershell -ExecutionPolicy Bypass -File setup-notifications.ps1",
+    "test": "node --check server.js"
+  },
+  "keywords": [
+    "telecom",
+    "website",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "nodemailer": "^9.1.0"
+  }
+}

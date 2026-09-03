@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vulithuba Leads</title>
+    <style>
+      :root {
+        --bg: #f4f8ff;
+        --card: #ffffff;
+        --primary: #0f4c81;
+        --text: #12263b;
+        --muted: #52657b;
+        --line: rgba(18, 38, 59, 0.12);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 24px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 0 10px 24px rgba(18, 38, 59, 0.06);
+      }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      h1 { margin: 0; }
+      .logout {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--primary);
+        font-weight: 700;
+        padding: 10px 16px;
+        cursor: pointer;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th, td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+      }
+      th { background: #eef5ff; }
+      .status {
+        color: var(--primary);
+        font-weight: 700;
+      }
+      a { color: var(--primary); }
+      .error {
+        color: #a82020;
+        background: #fff1f1;
+        border: 1px solid #f3c4c4;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <div class="topbar">
+          <h1>Vulithuba lead dashboard</h1>
+          <button class="logout" id="logoutBtn">Logout</button>
+        </div>
+        <p class="status">Latest customer enquiries</p>
+        <div id="errorBox" class="error" style="display:none"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Company</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="leadTableBody">
+            <tr>
+              <td colspan="5">Loading leads...</td>
+            </tr>
+          </tbody>
+        </table>
+        <p><a href="./index.html">Back to website</a></p>
+      </div>
+    </div>
+
+    <script>
+      const apiBase = window.location.protocol === 'file:' ? 'http://127.0.0.1:3000' : window.location.origin;
+
+      async function loadSession() {
+        const response = await fetch(`${apiBase}/api/me`, { credentials: 'include' });
+        if (!response.ok) {
+          window.location.href = `${apiBase}/login.html`;
+          return false;
+        }
+        return true;
+      }
+
+      async function loadLeads() {
+        const response = await fetch(`${apiBase}/api/leads`, { credentials: 'include' });
+        const data = await response.json();
+        const tbody = document.getElementById('leadTableBody');
+
+        if (!response.ok) {
+          document.getElementById('errorBox').style.display = 'block';
+          document.getElementById('errorBox').textContent = data.error || 'Unable to load leads.';
+          tbody.innerHTML = '<tr><td colspan="5">Access denied.</td></tr>';
+          return;
+        }
+
+        if (!data.rows || data.rows.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5">No leads yet.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.rows.map((row) => `
+          <tr>
+            <td>${row.id}</td>
+            <td>${row.name}</td>
+            <td>${row.email}</td>
+            <td>${row.company || '—'}</td>
+            <td>${new Date(row.created_at).toLocaleString()}</td>
+          </tr>
+        `).join('');
+      }
+
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch(`${apiBase}/api/logout`, { method: 'POST', credentials: 'include' });
+        window.location.href = `${apiBase}/login.html`;
+      });
+
+      loadSession().then((ok) => {
+        if (ok) loadLeads();
+      });
+    </script>
+  </body>
+</html>

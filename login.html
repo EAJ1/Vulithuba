@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vulithuba Admin Login</title>
+    <style>
+      :root {
+        --bg: #f4f8ff;
+        --card: #ffffff;
+        --primary: #0f4c81;
+        --primary-dark: #0b3d69;
+        --text: #12263b;
+        --muted: #52657b;
+        --line: rgba(18, 38, 59, 0.12);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(180deg, #f5f9ff 0%, #edf4ff 100%);
+        font-family: Arial, sans-serif;
+        color: var(--text);
+      }
+      .panel {
+        width: min(420px, calc(100% - 24px));
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 28px;
+        box-shadow: 0 18px 40px rgba(19, 47, 76, 0.08);
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+      }
+      p {
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        font-size: 1rem;
+        margin-bottom: 16px;
+      }
+      button {
+        width: 100%;
+        border: 0;
+        border-radius: 999px;
+        padding: 14px 20px;
+        background: linear-gradient(135deg, var(--primary) 0%, #1d6fd6 100%);
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .footer-link {
+        text-align: center;
+        margin-top: 18px;
+      }
+      .footer-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .error {
+        display: none;
+        background: #fff1f1;
+        color: #a82020;
+        border: 1px solid #f3c4c4;
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin-bottom: 14px;
+      }
+      .error.show { display: block; }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <h1>Admin Login</h1>
+      <p>Secure access to Vulithuba customer leads.</p>
+
+      <div id="errorBox" class="error" role="alert"></div>
+
+      <form id="loginForm">
+        <div>
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" autocomplete="username" required />
+        </div>
+
+        <div>
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
+        </div>
+
+        <button type="submit" id="loginButton">Login</button>
+      </form>
+
+      <div class="footer-link">
+        <a href="./signup.html">Need an account? Sign up</a>
+      </div>
+      <div class="footer-link">
+        <a href="./forgot-password.html">Forgot password?</a>
+      </div>
+      <div class="footer-link">
+        <a href="./index.html">Back to website</a>
+      </div>
+    </div>
+
+    <script>
+      if (window.location.protocol === 'file:') {
+        window.location.replace('http://127.0.0.1:3000/login.html');
+      }
+      const apiBase = window.location.protocol === 'file:' ? 'http://127.0.0.1:3000' : window.location.origin;
+      const apiBases = [...new Set([apiBase, 'http://127.0.0.1:3000', 'http://localhost:3000'])];
+      const form = document.getElementById('loginForm');
+      const errorBox = document.getElementById('errorBox');
+      const loginButton = document.getElementById('loginButton');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!username || !password) {
+          errorBox.textContent = 'Please fill in both username and password.';
+          errorBox.classList.add('show');
+          return;
+        }
+
+        loginButton.disabled = true;
+        loginButton.textContent = 'Logging in...';
+        errorBox.classList.remove('show');
+
+        try {
+          let requestBase = apiBases[0];
+          let response;
+          for (const candidateBase of apiBases) {
+            requestBase = candidateBase;
+            try {
+              response = await fetch(`${requestBase}/api/login`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+              });
+            } catch (error) {
+              if (candidateBase === apiBases[apiBases.length - 1]) throw error;
+              continue;
+            }
+            if (response.status !== 404 || candidateBase === apiBases[apiBases.length - 1]) break;
+          }
+
+          const rawText = await response.text();
+          let result = {};
+          try {
+            result = rawText ? JSON.parse(rawText) : {};
+          } catch (error) {
+            throw new Error(`Server returned an invalid response (${response.status}).`);
+          }
+
+          if (!response.ok || result.ok === false) {
+            if (result.requiresVerification) {
+              window.location.href = `verify-account.html?username=${encodeURIComponent(username)}`;
+              return;
+            }
+            throw new Error(result.error || 'Login failed.');
+          }
+
+          window.location.href = `${requestBase}/account.html`;
+        } catch (error) {
+          errorBox.textContent = error.message || 'Unable to login. Please try again.';
+          errorBox.classList.add('show');
+        } finally {
+          loginButton.disabled = false;
+          loginButton.textContent = 'Login';
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Account</title>
+    <style>
+      :root {
+        --bg: #f4f8ff;
+        --card: #ffffff;
+        --primary: #0f4c81;
+        --primary-soft: #eef5ff;
+        --text: #12263b;
+        --muted: #52657b;
+        --line: rgba(18, 38, 59, 0.12);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(180deg, #f5f9ff 0%, #edf4ff 100%);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 40px auto;
+        padding: 24px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 28px;
+        box-shadow: 0 16px 36px rgba(19, 47, 76, 0.08);
+      }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      h1 { margin: 0; }
+      .logout {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--primary);
+        border-radius: 999px;
+        padding: 10px 18px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .danger {
+        margin-top: 24px;
+        border: 1px solid #e7b6b6;
+        background: #fff7f7;
+        color: #a82020;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .password-box {
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid var(--line);
+      }
+      .profile-box {
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid var(--line);
+      }
+      .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 18px;
+      }
+      .profile-grid label,
+      .password-box label {
+        display: block;
+        font-weight: 700;
+        margin-top: 10px;
+      }
+      .profile-grid input,
+      .profile-grid select {
+        width: 100%;
+        margin-top: 7px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font-size: 1rem;
+        background: #fff;
+      }
+      .profile-grid .full-width {
+        grid-column: 1 / -1;
+      }
+      .profile-box button {
+        margin-top: 18px;
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .profile-message {
+        color: var(--muted);
+        margin-top: 12px;
+      }
+      .password-box input {
+        width: 100%;
+        margin: 8px 0 12px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font-size: 1rem;
+      }
+      .password-box button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .password-message {
+        color: var(--muted);
+        margin-top: 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        margin-top: 18px;
+      }
+      .panel {
+        background: var(--primary-soft);
+        border: 1px solid rgba(15, 76, 129, 0.08);
+        border-radius: 16px;
+        padding: 20px;
+      }
+      .label {
+        color: var(--muted);
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+      }
+      .value {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      a { color: var(--primary); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <div class="topbar">
+          <h1>My account</h1>
+          <button class="logout" id="logoutBtn">Logout</button>
+        </div>
+
+        <div id="welcomeText">Loading account...</div>
+
+        <div class="grid">
+          <div class="panel">
+            <div class="label">Customer</div>
+            <div class="value" id="fullName">Loading...</div>
+          </div>
+          <div class="panel">
+            <div class="label">Email</div>
+            <div class="value" id="email">Loading...</div>
+          </div>
+          <div class="panel">
+            <div class="label">Phone</div>
+            <div class="value" id="phone">Loading...</div>
+          </div>
+          <div class="panel">
+            <div class="label">Address</div>
+            <div class="value" id="address">Loading...</div>
+          </div>
+          <div class="panel">
+            <div class="label">Plan</div>
+            <div class="value" id="plan">Loading...</div>
+          </div>
+          <div class="panel">
+            <div class="label">Status</div>
+            <div class="value" id="billingStatus">Loading...</div>
+          </div>
+          <div class="panel">
+            <div class="label">Payment method</div>
+            <div class="value" id="billingMethod">Loading...</div>
+          </div>
+        </div>
+
+        <p><a href="./index.html">Back to website</a></p>
+        <div class="profile-box">
+          <h2>Update account details</h2>
+          <form id="profileForm">
+            <div class="profile-grid">
+              <div>
+                <label for="profileFullName">Full name</label>
+                <input id="profileFullName" type="text" minlength="2" required />
+              </div>
+              <div>
+                <label for="profilePhone">Phone number</label>
+                <input id="profilePhone" type="tel" minlength="7" required />
+              </div>
+              <div class="full-width">
+                <label for="profileAddress">Installation address</label>
+                <input id="profileAddress" type="text" minlength="5" required />
+              </div>
+              <div>
+                <label for="profilePlan">Plan</label>
+                <select id="profilePlan" required>
+                  <option value="Fibre Lite">Fibre Lite</option>
+                  <option value="Family Plus">Family Plus</option>
+                  <option value="Office Pro">Office Pro</option>
+                </select>
+              </div>
+              <div>
+                <label for="profileBillingMethod">Payment method</label>
+                <select id="profileBillingMethod" required>
+                  <option value="EFT">EFT / bank transfer</option>
+                  <option value="Debit order">Debit order</option>
+                  <option value="Card">Card</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit">Save details</button>
+          </form>
+          <p class="profile-message" id="profileMessage"></p>
+        </div>
+        <div class="password-box">
+          <h2>Change password</h2>
+          <form id="passwordForm">
+            <label for="currentPassword">Current password</label>
+            <input id="currentPassword" type="password" required autocomplete="current-password" />
+            <label for="newPassword">New password</label>
+            <input id="newPassword" type="password" minlength="8" required autocomplete="new-password" />
+            <label for="confirmNewPassword">Confirm new password</label>
+            <input id="confirmNewPassword" type="password" minlength="8" required autocomplete="new-password" />
+            <button type="submit">Change password</button>
+          </form>
+          <p class="password-message" id="passwordMessage"></p>
+        </div>
+        <button class="danger" id="deleteAccountBtn" type="button">Delete my account</button>
+      </div>
+    </div>
+
+    <script>
+      const apiBase = window.location.protocol === 'file:' ? 'http://127.0.0.1:3000' : window.location.origin;
+
+      async function loadAccount() {
+        const response = await fetch(`${apiBase}/api/me`, { credentials: 'include' });
+        if (!response.ok) {
+          window.location.href = `${apiBase}/login.html`;
+          return;
+        }
+
+        const data = await response.json();
+        document.getElementById('welcomeText').innerHTML = `Welcome, <strong>${data.user.username}</strong>. Your account is ready.`;
+        document.getElementById('fullName').textContent = data.user.fullName || 'Not provided';
+        document.getElementById('email').textContent = data.user.email || 'Not provided';
+        document.getElementById('phone').textContent = data.user.phone || 'Not provided';
+        document.getElementById('address').textContent = data.user.address || 'Not provided';
+        document.getElementById('plan').textContent = data.user.plan || 'Not selected';
+        document.getElementById('billingStatus').textContent = data.user.billingStatus || 'Pending';
+        document.getElementById('billingMethod').textContent = data.user.billingMethod || 'Not selected';
+        document.getElementById('profileFullName').value = data.user.fullName || '';
+        document.getElementById('profilePhone').value = data.user.phone || '';
+        document.getElementById('profileAddress').value = data.user.address || '';
+        document.getElementById('profilePlan').value = data.user.plan || 'Fibre Lite';
+        document.getElementById('profileBillingMethod').value = data.user.billingMethod || 'EFT';
+      }
+
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch(`${apiBase}/api/logout`, { method: 'POST', credentials: 'include' });
+        window.location.href = `${apiBase}/login.html`;
+      });
+
+      document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+        if (!window.confirm('Delete your account permanently? This cannot be undone.')) return;
+        const button = document.getElementById('deleteAccountBtn');
+        button.disabled = true;
+        button.textContent = 'Deleting account...';
+        try {
+          const response = await fetch(`${apiBase}/api/delete-account`, { method: 'POST', credentials: 'include' });
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || 'Unable to delete account.');
+          }
+          window.location.href = `${apiBase}/signup.html`;
+        } catch (error) {
+          button.disabled = false;
+          button.textContent = 'Delete my account';
+          window.alert(error.message || 'Unable to delete account.');
+        }
+      });
+
+      document.getElementById('passwordForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const message = document.getElementById('passwordMessage');
+        const response = await fetch(`${apiBase}/api/change-password`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            currentPassword: document.getElementById('currentPassword').value,
+            newPassword: document.getElementById('newPassword').value,
+            confirmPassword: document.getElementById('confirmNewPassword').value
+          })
+        });
+        const data = await response.json();
+        message.textContent = data.message || data.error || 'Unable to change password.';
+        if (response.ok) {
+          setTimeout(() => { window.location.href = `${apiBase}/login.html`; }, 1200);
+        }
+      });
+
+      loadAccount();
+
+      document.getElementById('profileForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const message = document.getElementById('profileMessage');
+      const button = event.currentTarget.querySelector('button');
+      button.disabled = true;
+      button.textContent = 'Saving...';
+
+      try {
+        const response = await fetch(`${apiBase}/api/update-profile`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullName: document.getElementById('profileFullName').value.trim(),
+            phone: document.getElementById('profilePhone').value.trim(),
+            address: document.getElementById('profileAddress').value.trim(),
+            plan: document.getElementById('profilePlan').value,
+            billingMethod: document.getElementById('profileBillingMethod').value
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Unable to update account details.');
+        message.textContent = data.message;
+        loadAccount();
+      } catch (error) {
+        message.textContent = error.message || 'Unable to update account details.';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Save details';
+      }
+      });
+    </script>
+  </body>
+</html>

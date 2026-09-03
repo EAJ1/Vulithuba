@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vulithuba Sign Up</title>
+    <style>
+      :root {
+        --bg: #f4f8ff;
+        --card: #ffffff;
+        --primary: #0f4c81;
+        --text: #12263b;
+        --muted: #52657b;
+        --line: rgba(18, 38, 59, 0.12);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(180deg, #f5f9ff 0%, #edf4ff 100%);
+        font-family: Arial, sans-serif;
+        color: var(--text);
+      }
+      .panel {
+        width: min(460px, calc(100% - 24px));
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 30px;
+        box-shadow: 0 18px 40px rgba(19, 47, 76, 0.08);
+      }
+      h1 { margin: 0 0 8px; font-size: 2rem; }
+      p { color: var(--muted); margin-bottom: 20px; }
+      label { display: block; margin-bottom: 8px; font-weight: 700; }
+      input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        margin-bottom: 16px;
+        font-size: 1rem;
+      }
+      select {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        margin-bottom: 16px;
+        font-size: 1rem;
+        background: #fff;
+      }
+      .payment-note {
+        font-size: 0.85rem;
+        margin: 0 0 16px;
+      }
+      button {
+        width: 100%;
+        border: 0;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--primary) 0%, #1d6fd6 100%);
+        color: #fff;
+        padding: 14px 20px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .footer-link {
+        text-align: center;
+        margin-top: 18px;
+      }
+      .footer-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .error {
+        display: none;
+        background: #fff1f1;
+        color: #a82020;
+        border: 1px solid #f3c4c4;
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin-bottom: 14px;
+      }
+      .error.show { display: block; }
+      .success {
+        display: none;
+        background: #ebfff2;
+        color: #166b38;
+        border: 1px solid #bfe8cb;
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin-bottom: 14px;
+      }
+      .success.show { display: block; }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <h1>Create account</h1>
+      <p>Join Vulithuba to manage services, plans and support.</p>
+
+      <div id="errorBox" class="error" role="alert"></div>
+      <div id="successBox" class="success" role="status"></div>
+
+      <form id="signupForm">
+        <div>
+          <label for="fullName">Full name</label>
+          <input id="fullName" name="fullName" type="text" minlength="2" required />
+        </div>
+
+        <div>
+          <label for="phone">Phone number</label>
+          <div class="phone-row">
+            <select id="countryCode" aria-label="Country calling code">
+              <option value="+27">+27 South Africa</option>
+              <option value="+1">+1 United States / Canada</option>
+              <option value="+44">+44 United Kingdom</option>
+              <option value="+61">+61 Australia</option>
+              <option value="+64">+64 New Zealand</option>
+              <option value="+91">+91 India</option>
+              <option value="+86">+86 China</option>
+              <option value="+81">+81 Japan</option>
+              <option value="+49">+49 Germany</option>
+              <option value="+33">+33 France</option>
+              <option value="+39">+39 Italy</option>
+              <option value="+34">+34 Spain</option>
+              <option value="+31">+31 Netherlands</option>
+              <option value="+41">+41 Switzerland</option>
+              <option value="+971">+971 United Arab Emirates</option>
+              <option value="+234">+234 Nigeria</option>
+              <option value="+254">+254 Kenya</option>
+              <option value="+255">+255 Tanzania</option>
+              <option value="+263">+263 Zimbabwe</option>
+              <option value="+260">+260 Zambia</option>
+              <option value="+265">+265 Malawi</option>
+              <option value="+258">+258 Mozambique</option>
+              <option value="+20">+20 Egypt</option>
+              <option value="+212">+212 Morocco</option>
+              <option value="+55">+55 Brazil</option>
+              <option value="+52">+52 Mexico</option>
+              <option value="+7">+7 Russia / Kazakhstan</option>
+              <option value="+82">+82 South Korea</option>
+              <option value="+65">+65 Singapore</option>
+            </select>
+            <input id="phone" name="phone" type="tel" minlength="7" placeholder="Phone number" required />
+          </div>
+        </div>
+
+        <div>
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" minlength="3" required />
+        </div>
+
+        <div>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required />
+        </div>
+
+        <div>
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" minlength="8" required />
+        </div>
+
+        <div>
+          <label for="confirmPassword">Confirm password</label>
+          <input id="confirmPassword" name="confirmPassword" type="password" minlength="8" required />
+        </div>
+
+        <div>
+          <label for="address">Installation address</label>
+          <input id="address" name="address" type="text" minlength="5" placeholder="Street, suburb, town" required />
+        </div>
+
+        <div>
+          <label for="plan">Choose a plan</label>
+          <select id="plan" name="plan" required>
+            <option value="Fibre Lite">Fibre Lite - R399/month</option>
+            <option value="Family Plus">Family Plus - R699/month</option>
+            <option value="Office Pro">Office Pro - R1,299/month</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="billingMethod">Preferred payment method</label>
+          <select id="billingMethod" name="billingMethod" required>
+            <option value="EFT">EFT / bank transfer</option>
+            <option value="Debit order">Debit order</option>
+            <option value="Card">Card - secure checkout later</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="verificationMethod">Verify account by</label>
+          <select id="verificationMethod" name="verificationMethod" required>
+            <option value="email">Email one-time code</option>
+            <option value="sms">SMS one-time code</option>
+          </select>
+        </div>
+
+        <p class="payment-note">Your card details are never stored on this website. A secure payment provider can be connected for card payments.</p>
+
+        <button type="submit" id="signupButton">Sign up</button>
+      </form>
+
+      <div class="footer-link">
+        <a href="./login.html">Already have an account? Log in</a>
+      </div>
+      <div class="footer-link">
+        <a href="./index.html">Back to website</a>
+      </div>
+    </div>
+
+    <script>
+      if (window.location.protocol === 'file:') {
+        window.location.replace('http://127.0.0.1:3000/signup.html');
+      }
+      const apiBase = window.location.protocol === 'file:' ? 'http://127.0.0.1:3000' : window.location.origin;
+      const form = document.getElementById('signupForm');
+      const errorBox = document.getElementById('errorBox');
+      const successBox = document.getElementById('successBox');
+      const signupButton = document.getElementById('signupButton');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const fullName = document.getElementById('fullName').value.trim();
+        const phone = `${document.getElementById('countryCode').value}${document.getElementById('phone').value.trim().replace(/^0+/, '')}`;
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const address = document.getElementById('address').value.trim();
+        const plan = document.getElementById('plan').value;
+        const billingMethod = document.getElementById('billingMethod').value;
+        const verificationMethod = document.getElementById('verificationMethod').value;
+
+        if (!fullName || !phone || !username || !email || !password || !confirmPassword || !address) {
+          errorBox.textContent = 'Please complete all fields.';
+          errorBox.classList.add('show');
+          successBox.classList.remove('show');
+          return;
+        }
+
+        signupButton.disabled = true;
+        signupButton.textContent = 'Creating account...';
+        errorBox.classList.remove('show');
+        successBox.classList.remove('show');
+
+        try {
+          const response = await fetch(`${apiBase}/api/signup`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullName, phone, username, email, password, confirmPassword, address, plan, billingMethod, verificationMethod })
+          });
+
+          const rawText = await response.text();
+          let result = {};
+          try {
+            result = rawText ? JSON.parse(rawText) : {};
+          } catch (error) {
+            throw new Error(`Server returned an invalid response (${response.status}).`);
+          }
+
+          if (!response.ok || result.ok === false) {
+            throw new Error(result.error || 'Sign up failed.');
+          }
+
+          successBox.textContent = result.requiresVerification
+            ? 'Account created. Check your verification code...'
+            : 'Account created successfully. You can now log in.';
+          successBox.classList.add('show');
+          form.reset();
+
+          setTimeout(() => {
+            const destination = result.requiresVerification
+              ? `${apiBase}/verify-account.html?username=${encodeURIComponent(username)}&channel=${encodeURIComponent(result.channel || verificationMethod)}`
+              : `${apiBase}/login.html`;
+            window.location.href = destination;
+          }, 1200);
+        } catch (error) {
+          errorBox.textContent = error.message || 'Unable to create account. Please try again.';
+          errorBox.classList.add('show');
+        } finally {
+          signupButton.disabled = false;
+          signupButton.textContent = 'Sign up';
+        }
+      });
+    </script>
+  </body>
+</html>
