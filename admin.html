@@ -100,6 +100,22 @@
             </tr>
           </tbody>
         </table>
+        <h2>Payments</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Payment ID</th>
+              <th>Customer</th>
+              <th>Plan</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody id="paymentTableBody">
+            <tr><td colspan="6">Loading payments...</td></tr>
+          </tbody>
+        </table>
         <p><a href="./index.html">Back to website</a></p>
       </div>
     </div>
@@ -128,6 +144,30 @@
           return;
         }
 
+        async function loadPayments() {
+          const response = await fetch(`${apiBase}/api/payments`, { credentials: 'include' });
+          const data = await response.json();
+          const tbody = document.getElementById('paymentTableBody');
+          if (!response.ok) {
+            tbody.innerHTML = '<tr><td colspan="6">Unable to load payments.</td></tr>';
+            return;
+          }
+          if (!data.rows || data.rows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6">No payments yet.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.rows.map((row) => `
+            <tr>
+              <td>${row.payment_id}</td>
+              <td>${row.username}<br>${row.email}</td>
+              <td>${row.plan}</td>
+              <td>R${row.amount}</td>
+              <td class="status">${row.status}</td>
+              <td>${new Date(row.updated_at).toLocaleString()}</td>
+            </tr>
+          `).join('');
+        }
+
         if (!data.rows || data.rows.length === 0) {
           tbody.innerHTML = '<tr><td colspan="5">No leads yet.</td></tr>';
           return;
@@ -150,7 +190,10 @@
       });
 
       loadSession().then((ok) => {
-        if (ok) loadLeads();
+        if (ok) {
+          loadLeads();
+          loadPayments();
+        }
       });
     </script>
   </body>

@@ -21,6 +21,13 @@ const TWILIO_VERIFY_CONFIGURED = Boolean(
   process.env.TWILIO_AUTH_TOKEN &&
   process.env.TWILIO_VERIFY_SERVICE_SID
 );
+const PAYFAST_CONFIGURED = Boolean(
+  process.env.PAYFAST_MERCHANT_ID &&
+  process.env.PAYFAST_MERCHANT_KEY &&
+  process.env.PAYFAST_PASSPHRASE
+);
+const PAYFAST_URL = String(process.env.PAYFAST_URL || 'https://sandbox.payfast.co.za/eng/process').replace(/\/$/, '');
+const APP_URL = String(process.env.APP_URL || `http://127.0.0.1:${process.env.PORT || 3000}`).replace(/\/$/, '');
 const mailer = SMTP_CONFIGURED
   ? nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -87,6 +94,19 @@ db.exec(`
     expires_at TEXT NOT NULL,
     attempts INTEGER NOT NULL DEFAULT 0,
     used_at TEXT,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    payment_id TEXT NOT NULL UNIQUE,
+    amount TEXT NOT NULL,
+    plan TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'created',
+    provider TEXT NOT NULL DEFAULT 'payfast',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
   );
 `);
@@ -247,6 +267,25 @@ function hashPassword(password, salt) {
   return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
 }
 
+const PLAN_PRICES = {
+  'Fibre Lite': '399.00',
+  'Family Plus': '699.00',
+  'Office Pro': '1299.00'
+};
+
+function payFastEncode(value) {
+  return encodeURIComponent(String(value).trim()).replace(/%20/g, '+');
+}
+
+function payFastSignature(fields) {
+  const payload = Object.entries(fields)
+    .filter(([, value]) => value !== undefined && value !== null && value !== '')
+    .map(([key, value]) => `${key}=${payFastEncode(value)}`)
+    .join('&');
+  const withPassphrase = `${payload}&passphrase=${payFastEncode(process.env.PAYFAST_PASSPHRASE)}`;
+  return crypto.createHash('md5').update(withPassphrase).digest('hex');
+}
+
 function safeEqual(left, right) {
   const a = Buffer.from(left);
   const b = Buffer.from(right);
@@ -355,6 +394,14 @@ async function sendPasswordResetEmail(email, resetLink) {
     ].join('\n')
   });
   return { sent: true };
+}
+
+function getAppUrl(req) {
+  const host = String(req.headers.host || '');
+  if (/^(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host)) {
+    return `http://${host}`;
+  }
+  return APP_URL;
 }
 
 function hashVerificationCode(code) {
@@ -500,6 +547,7 @@ const server = http.createServer(async (req, res) => {
       emailConfigured: SMTP_CONFIGURED,
       smsConfigured: SMS_CONFIGURED,
       smsOtpConfigured: TWILIO_VERIFY_CONFIGURED
+      ,payfastConfigured: PAYFAST_CONFIGURED
     });
     return;
   }
@@ -737,6 +785,75 @@ const server = http.createServer(async (req, res) => {
     } catch (error) {
       sendJson(res, 400, { ok: false, error: error.message || 'Unable to update account details.' });
     }
+
+    return;
+  }
+
+  if (method === 'POST' && url.pathname === '/api/payfast/checkout') {
+    const user = requireAuth(req, res);
+    if (!user) return;
+    if (!PAYFAST_CONFIGURED) {
+      sendJson(res, 503, { ok: false, error: 'PayFast is not configured. Add PayFast merchant credentials and APP_URL.' });
+      return;
+    }
+
+    try {
+      const body = await parseBody(req);
+      const plan = String(body.plan || user.plan || '').trim();
+      const amount = PLAN_PRICES[plan];
+      if (!amount) throw new Error('Please select a valid plan.');
+
+      const paymentId = `VUL-${Date.now()}-${user.id}`;
+      db.prepare('INSERT INTO payments (user_id, payment_id, amount, plan) VALUES (?, ?, ?, ?)')
+        .run(user.id, paymentId, amount, plan);
+
+      const nameParts = String(user.full_name || user.username).trim().split(/\s+/);
+      const fields = {
+        merchant_id: process.env.PAYFAST_MERCHANT_ID,
+        merchant_key: process.env.PAYFAST_MERCHANT_KEY,
+        return_url: `${APP_URL}/account.html?payment=success`,
+        cancel_url: `${APP_URL}/account.html?payment=cancelled`,
+        notify_url: `${APP_URL}/api/payfast/notify`,
+        name_first: nameParts[0],
+        name_last: nameParts.slice(1).join(' ') || nameParts[0],
+        email_address: user.email,
+        m_payment_id: paymentId,
+        amount,
+        item_name: `Vulithuba ${plan}`
+      };
+      sendJson(res, 200, { ok: true, action: PAYFAST_URL, fields: { ...fields, signature: payFastSignature(fields) } });
+    } catch (error) {
+      sendJson(res, 400, { ok: false, error: error.message || 'Unable to create payment.' });
+    }
+    return;
+  }
+
+  if (method === 'POST' && url.pathname === '/api/payfast/notify') {
+    try {
+      const body = await parseBody(req);
+      const receivedSignature = String(body.signature || '');
+      const fields = { ...body };
+      delete fields.signature;
+      if (!receivedSignature || receivedSignature !== payFastSignature(fields)) {
+        sendJson(res, 400, { ok: false, error: 'Invalid payment signature.' });
+        return;
+      }
+
+      const payment = db.prepare('SELECT id, user_id FROM payments WHERE payment_id = ?').get(String(body.m_payment_id || ''));
+      if (!payment) {
+        sendJson(res, 404, { ok: false, error: 'Payment not found.' });
+        return;
+      }
+
+      const status = String(body.payment_status || 'unknown').toLowerCase();
+      db.prepare('UPDATE payments SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, payment.id);
+      if (status === 'complete') {
+        db.prepare("UPDATE users SET billing_status = 'paid' WHERE id = ?").run(payment.user_id);
+      }
+      sendJson(res, 200, { ok: true });
+    } catch (error) {
+      sendJson(res, 400, { ok: false, error: error.message || 'Unable to process payment notification.' });
+    }
     return;
   }
 
@@ -809,7 +926,7 @@ const server = http.createServer(async (req, res) => {
         const expiresAt = new Date(Date.now() + 3600000).toISOString();
         db.prepare('DELETE FROM password_resets WHERE user_id = ?').run(user.id);
         db.prepare('INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?, ?, ?)').run(user.id, tokenHash, expiresAt);
-        const appUrl = String(process.env.APP_URL || `http://127.0.0.1:${PORT || 3000}`).replace(/\/$/, '');
+        const appUrl = getAppUrl(req).replace(/\/$/, '');
         const resetLink = `${appUrl}/reset-password.html?token=${rawToken}`;
         const delivery = await sendPasswordResetEmail(email, resetLink);
         if (!delivery.sent) {
@@ -865,6 +982,25 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (method === 'GET' && url.pathname === '/api/payments') {
+    const user = requireAuth(req, res);
+    if (!user) return;
+    if (user.username !== ADMIN_USERNAME) {
+      sendJson(res, 403, { ok: false, error: 'Administrator access required.' });
+      return;
+    }
+    const rows = db.prepare(`
+      SELECT payments.payment_id, payments.amount, payments.plan, payments.status,
+             payments.created_at, payments.updated_at, users.username, users.email
+      FROM payments
+      JOIN users ON users.id = payments.user_id
+      ORDER BY payments.id DESC
+      LIMIT 100
+    `).all();
+    sendJson(res, 200, { rows });
+    return;
+  }
+
   if (method === 'POST' && url.pathname === '/api/contact') {
     try {
       const body = await parseBody(req);
@@ -881,9 +1017,11 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, {
         ok: true,
         saved: true,
-        message: notices.length
-          ? 'Request saved successfully. We will follow up when notifications are configured.'
-          : 'Request saved and notifications sent successfully.',
+        message: !emailResult.sent
+          ? 'Request saved, but email notification could not be sent.'
+          : !smsResult.sent
+            ? 'Request saved and email sent successfully. SMS notification is currently unavailable.'
+            : 'Request saved and notifications sent successfully.',
         notice: notices.length ? notices.join(' ') : undefined
       });
     } catch (error) {

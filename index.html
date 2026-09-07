@@ -10,11 +10,16 @@
     />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:3000 http://127.0.0.1:3000; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:3000 http://127.0.0.1:3000; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
     />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
     <meta http-equiv="Permissions-Policy" content="geolocation=(), camera=(), microphone=()" />
+    <script>
+      if (window.location.protocol === 'file:') {
+        window.location.replace('http://127.0.0.1:3000/index.html');
+      }
+    </script>
     <title>Vulithuba Telecom | Smart Connectivity for South Africa</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -298,7 +303,7 @@
                 <li>Wi-Fi setup</li>
                 <li>Basic support</li>
               </ul>
-              <a href="#contact" class="btn btn-secondary">Choose plan</a>
+              <a href="./signup.html?plan=Fibre%20Lite" class="btn btn-secondary">Choose plan</a>
             </article>
 
             <article class="plan-card featured-plan">
@@ -314,7 +319,7 @@
                 <li>Priority support</li>
                 <li>Smart home ready</li>
               </ul>
-              <a href="#contact" class="btn btn-primary">Choose plan</a>
+              <a href="./signup.html?plan=Family%20Plus" class="btn btn-primary">Choose plan</a>
             </article>
 
             <article class="plan-card">
@@ -330,7 +335,7 @@
                 <li>Business-grade support</li>
                 <li>Multi-site options</li>
               </ul>
-              <a href="#contact" class="btn btn-secondary">Choose plan</a>
+              <a href="./signup.html?plan=Office%20Pro" class="btn btn-secondary">Choose plan</a>
             </article>
           </div>
         </div>
@@ -482,6 +487,7 @@
       </div>
     </footer>
 
-    <script src="script-v2.js"></script>
+    <script src="script-v3.js"></script>
   </body>
 </html>
+

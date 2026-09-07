@@ -214,13 +214,17 @@
 
     <script>
       if (window.location.protocol === 'file:') {
-        window.location.replace('http://127.0.0.1:3000/signup.html');
+        window.location.replace(`http://127.0.0.1:3000/signup.html${window.location.search}`);
       }
       const apiBase = window.location.protocol === 'file:' ? 'http://127.0.0.1:3000' : window.location.origin;
       const form = document.getElementById('signupForm');
       const errorBox = document.getElementById('errorBox');
       const successBox = document.getElementById('successBox');
       const signupButton = document.getElementById('signupButton');
+      const selectedPlan = new URLSearchParams(window.location.search).get('plan');
+      if (selectedPlan && ['Fibre Lite', 'Family Plus', 'Office Pro'].includes(selectedPlan)) {
+        document.getElementById('plan').value = selectedPlan;
+      }
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();

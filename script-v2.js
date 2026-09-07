@@ -59,21 +59,6 @@ if (contactForm) {
     button.disabled = true;
 
     try {
-      if (window.location.protocol === 'file:') {
-        let pendingLeads = [];
-        try {
-          pendingLeads = JSON.parse(localStorage.getItem('vulithuba_pending_leads') || '[]');
-          if (!Array.isArray(pendingLeads)) pendingLeads = [];
-          pendingLeads.push({ name, email, phone, company, createdAt: new Date().toISOString() });
-          localStorage.setItem('vulithuba_pending_leads', JSON.stringify(pendingLeads));
-        } catch (storageError) {
-          throw new Error('This browser blocks local storage. Open the site through the local server.');
-        }
-        button.textContent = 'Request saved';
-        contactForm.reset();
-        return;
-      }
-
       let requestBase = apiBase;
       let response = await fetch(`${requestBase}/api/contact`, {
         method: 'POST',
@@ -107,7 +92,11 @@ if (contactForm) {
 
       const text = await response.text();
       let result = {};
-      try { result = text ? JSON.parse(text) : {}; } catch (error) { result = { error: 'Could not send request.' }; }
+      try {
+        result = text ? JSON.parse(text) : {};
+      } catch (error) {
+        throw new Error(`Server returned an invalid response (${response.status}).`);
+      }
 
       if (!response.ok || result.ok === false) {
         throw new Error(result.error || 'Could not send request.');
@@ -116,24 +105,8 @@ if (contactForm) {
       button.textContent = 'Request sent';
       contactForm.reset();
     } catch (error) {
-      if (error instanceof TypeError || error.message === 'Failed to fetch') {
-        let pendingLeads = [];
-        try {
-          pendingLeads = JSON.parse(localStorage.getItem('vulithuba_pending_leads') || '[]');
-          if (!Array.isArray(pendingLeads)) pendingLeads = [];
-          pendingLeads.push({ name, email, phone, company, createdAt: new Date().toISOString() });
-          localStorage.setItem('vulithuba_pending_leads', JSON.stringify(pendingLeads));
-        } catch (storageError) {
-          button.textContent = 'Try again';
-          alert('The request could not be saved in this browser. Please open the site through the local server.');
-          return;
-        }
-        button.textContent = 'Request saved';
-        contactForm.reset();
-        return;
-      }
       button.textContent = 'Try again';
-      alert(error.message || 'Something went wrong.');
+      alert(error.message || 'Unable to send your callback request. Please use the website opened by start-vulithuba.command.');
     } finally {
       setTimeout(() => {
         button.textContent = originalText;

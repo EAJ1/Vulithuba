@@ -108,6 +108,23 @@
         color: var(--muted);
         margin-top: 12px;
       }
+      .payment-box {
+        margin-top: 28px;
+        padding: 22px;
+        border-radius: 16px;
+        background: #f7fbff;
+        border: 1px solid var(--line);
+      }
+      .payment-box button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        background: #0f4c81;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .payment-message { color: var(--muted); }
       .password-box input {
         width: 100%;
         margin: 8px 0 12px;
@@ -196,6 +213,13 @@
           </div>
         </div>
 
+        <div class="payment-box">
+          <h2>Pay for your plan</h2>
+          <p>Pay securely by EFT, debit/credit card, or any payment method enabled by PayFast.</p>
+          <button id="payNowBtn" type="button">Continue to secure payment</button>
+          <p class="payment-message" id="paymentMessage"></p>
+        </div>
+
         <p><a href="./index.html">Back to website</a></p>
         <div class="profile-box">
           <h2>Update account details</h2>
@@ -277,6 +301,21 @@
         document.getElementById('profileBillingMethod').value = data.user.billingMethod || 'EFT';
       }
 
+      async function loadPaymentStatus() {
+        const button = document.getElementById('payNowBtn');
+        const message = document.getElementById('paymentMessage');
+        try {
+          const response = await fetch(`${apiBase}/api/health`);
+          const data = await response.json();
+          if (!data.payfastConfigured) {
+            button.disabled = true;
+            message.textContent = 'Secure payment is not configured yet. Add PayFast merchant credentials on the server.';
+          }
+        } catch (error) {
+          message.textContent = 'Unable to check payment service status.';
+        }
+      }
+
       document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch(`${apiBase}/api/logout`, { method: 'POST', credentials: 'include' });
         window.location.href = `${apiBase}/login.html`;
@@ -322,6 +361,7 @@
       });
 
       loadAccount();
+      loadPaymentStatus();
 
       document.getElementById('profileForm').addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -342,6 +382,40 @@
             plan: document.getElementById('profilePlan').value,
             billingMethod: document.getElementById('profileBillingMethod').value
           })
+        });
+
+        document.getElementById('payNowBtn').addEventListener('click', async () => {
+          const button = document.getElementById('payNowBtn');
+          const message = document.getElementById('paymentMessage');
+          button.disabled = true;
+          button.textContent = 'Preparing secure checkout...';
+          message.textContent = '';
+          try {
+            const response = await fetch(`${apiBase}/api/payfast/checkout`, {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ plan: document.getElementById('profilePlan').value })
+            });
+            const data = await response.json();
+            if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to start payment.');
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = data.action;
+            Object.entries(data.fields).forEach(([name, value]) => {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = name;
+              input.value = value;
+              form.appendChild(input);
+            });
+            document.body.appendChild(form);
+            form.submit();
+          } catch (error) {
+            message.textContent = error.message || 'Unable to start payment.';
+            button.disabled = false;
+            button.textContent = 'Continue to secure payment';
+          }
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Unable to update account details.');
