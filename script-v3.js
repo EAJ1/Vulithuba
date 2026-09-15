@@ -10,12 +10,24 @@ if (yearEl) {
 }
 
 if (navToggle && mainNav) {
+  const setNavigationOpen = (open) => {
+    mainNav.classList.toggle('is-open', open);
+    navToggle.setAttribute('aria-expanded', String(open));
+  };
+
   navToggle.addEventListener('click', () => {
-    mainNav.classList.toggle('is-open');
+    setNavigationOpen(!mainNav.classList.contains('is-open'));
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && mainNav.classList.contains('is-open')) {
+      setNavigationOpen(false);
+      navToggle.focus();
+    }
   });
 
   mainNav.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => mainNav.classList.remove('is-open'));
+    link.addEventListener('click', () => setNavigationOpen(false));
   });
 }
 
