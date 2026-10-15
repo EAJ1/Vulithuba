@@ -20,6 +20,7 @@
         window.location.replace('http://127.0.0.1:3000/index.html');
       }
     </script>
+    <script>if(new URLSearchParams(location.search).get('mobile') === '1') document.documentElement.classList.add('mobile-app');</script>
     <title>Vulithuba Telecom | Smart Connectivity for South Africa</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -27,7 +28,7 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260915" />
+    <link rel="stylesheet" href="styles.css?v=20261012-account-nav" />
   </head>
   <body>
     <header class="site-header">
@@ -53,7 +54,7 @@
 
         <div class="nav-actions">
           <a href="./login.html" class="btn btn-secondary nav-btn">Log in</a>
-          <a href="./signup.html" class="btn btn-primary nav-btn">Sign up</a>
+          <a href="./signup.html" class="btn btn-primary nav-btn">Register</a>
         </div>
       </div>
     </header>

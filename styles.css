@@ -921,13 +921,20 @@ select:focus {
     display: flex;
   }
 
-  .nav-btn {
-    display: none;
+  .nav-actions {
+    display: flex;
+    flex-basis: 100%;
+    width: 100%;
+    gap: 0.75rem;
   }
 
-    .nav-actions {
-      display: none;
-    }
+  .nav-actions .nav-btn {
+    display: inline-flex;
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    justify-content: center;
+  }
 
     .section {
     padding: 82px 0;
@@ -1156,3 +1163,9 @@ html {
     flex-direction: column;
   }
 }
+
+/* The Flutter shell supplies navigation for embedded website pages. */
+.mobile-app .site-header, .mobile-app .site-footer { display: none; }
+.mobile-app .hero { padding-top: 32px; }
+.mobile-app .section { padding-top: 36px; padding-bottom: 36px; }
+.mobile-app { scroll-padding-top: 16px; }

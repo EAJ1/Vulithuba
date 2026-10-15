@@ -94,6 +94,11 @@
         margin-bottom: 14px;
       }
       .success.show { display: block; }
+      .field-error { display: block; color: #a82020; margin-top: 6px; }
+      .field-error[hidden] { display: none; }
+      [aria-invalid="true"] { border: 2px solid #a82020; }
+      .phone-row { flex-wrap: wrap; }
+      .phone-row .field-error { flex-basis: 100%; }
     </style>
   </head>
   <body>
@@ -104,10 +109,11 @@
       <div id="errorBox" class="error" role="alert"></div>
       <div id="successBox" class="success" role="status"></div>
 
-      <form id="signupForm">
+      <form id="signupForm" novalidate>
         <div>
           <label for="fullName">Full name</label>
-          <input id="fullName" name="fullName" type="text" minlength="2" required />
+          <input id="fullName" name="fullName" type="text" minlength="2" required aria-describedby="fullNameError" />
+          <small id="fullNameError" class="field-error" hidden></small>
         </div>
 
         <div>
@@ -144,59 +150,71 @@
               <option value="+82">+82 South Korea</option>
               <option value="+65">+65 Singapore</option>
             </select>
-            <input id="phone" name="phone" type="tel" minlength="7" placeholder="Phone number" required />
+            <input id="phone" name="phone" type="tel" minlength="7" placeholder="Phone number" required aria-describedby="phoneError" />
+          <small id="phoneError" class="field-error" hidden></small>
           </div>
         </div>
 
         <div>
           <label for="username">Username</label>
-          <input id="username" name="username" type="text" minlength="3" required />
+          <input id="username" name="username" type="text" minlength="3" required aria-describedby="usernameError" />
+          <small id="usernameError" class="field-error" hidden></small>
         </div>
 
         <div>
           <label for="email">Email</label>
-          <input id="email" name="email" type="email" required />
+          <input id="email" name="email" type="email" required aria-describedby="emailError" />
+          <small id="emailError" class="field-error" hidden></small>
         </div>
 
         <div>
           <label for="password">Password</label>
-          <input id="password" name="password" type="password" minlength="8" required />
+          <input id="password" name="password" type="password" minlength="6" required aria-describedby="passwordError" />
+          <small id="passwordError" class="field-error" hidden></small>
         </div>
 
         <div>
           <label for="confirmPassword">Confirm password</label>
-          <input id="confirmPassword" name="confirmPassword" type="password" minlength="8" required />
+          <input id="confirmPassword" name="confirmPassword" type="password" minlength="6" required aria-describedby="confirmPasswordError" />
+          <small id="confirmPasswordError" class="field-error" hidden></small>
         </div>
 
         <div>
           <label for="address">Installation address</label>
-          <input id="address" name="address" type="text" minlength="5" placeholder="Street, suburb, town" required />
+          <input id="address" name="address" type="text" minlength="5" placeholder="Street, suburb, town" required aria-describedby="addressError" />
+          <small id="addressError" class="field-error" hidden></small>
         </div>
 
         <div>
           <label for="plan">Choose a plan</label>
-          <select id="plan" name="plan" required>
+          <select id="plan" name="plan" required aria-describedby="planError">
+            <option value="">Choose an option</option>
             <option value="Fibre Lite">Fibre Lite - R399/month</option>
             <option value="Family Plus">Family Plus - R699/month</option>
             <option value="Office Pro">Office Pro - R1,299/month</option>
           </select>
+          <small id="planError" class="field-error" hidden></small>
         </div>
 
         <div>
           <label for="billingMethod">Preferred payment method</label>
-          <select id="billingMethod" name="billingMethod" required>
+          <select id="billingMethod" name="billingMethod" required aria-describedby="billingMethodError">
+            <option value="">Choose an option</option>
             <option value="EFT">EFT / bank transfer</option>
             <option value="Debit order">Debit order</option>
             <option value="Card">Card - secure checkout later</option>
           </select>
+          <small id="billingMethodError" class="field-error" hidden></small>
         </div>
 
         <div>
           <label for="verificationMethod">Verify account by</label>
-          <select id="verificationMethod" name="verificationMethod" required>
+          <select id="verificationMethod" name="verificationMethod" required aria-describedby="verificationMethodError">
+            <option value="">Choose an option</option>
             <option value="email">Email one-time code</option>
             <option value="sms">SMS one-time code</option>
           </select>
+          <small id="verificationMethodError" class="field-error" hidden></small>
         </div>
 
         <p class="payment-note">Your card details are never stored on this website. A secure payment provider can be connected for card payments.</p>
@@ -212,86 +230,7 @@
       </div>
     </div>
 
-    <script>
-      if (window.location.protocol === 'file:') {
-        window.location.replace(`http://127.0.0.1:3000/signup.html${window.location.search}`);
-      }
-      const apiBase = window.location.protocol === 'file:' ? 'http://127.0.0.1:3000' : window.location.origin;
-      const form = document.getElementById('signupForm');
-      const errorBox = document.getElementById('errorBox');
-      const successBox = document.getElementById('successBox');
-      const signupButton = document.getElementById('signupButton');
-      const selectedPlan = new URLSearchParams(window.location.search).get('plan');
-      if (selectedPlan && ['Fibre Lite', 'Family Plus', 'Office Pro'].includes(selectedPlan)) {
-        document.getElementById('plan').value = selectedPlan;
-      }
-
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const fullName = document.getElementById('fullName').value.trim();
-        const phone = `${document.getElementById('countryCode').value}${document.getElementById('phone').value.trim().replace(/^0+/, '')}`;
-        const username = document.getElementById('username').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        const address = document.getElementById('address').value.trim();
-        const plan = document.getElementById('plan').value;
-        const billingMethod = document.getElementById('billingMethod').value;
-        const verificationMethod = document.getElementById('verificationMethod').value;
-
-        if (!fullName || !phone || !username || !email || !password || !confirmPassword || !address) {
-          errorBox.textContent = 'Please complete all fields.';
-          errorBox.classList.add('show');
-          successBox.classList.remove('show');
-          return;
-        }
-
-        signupButton.disabled = true;
-        signupButton.textContent = 'Creating account...';
-        errorBox.classList.remove('show');
-        successBox.classList.remove('show');
-
-        try {
-          const response = await fetch(`${apiBase}/api/signup`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fullName, phone, username, email, password, confirmPassword, address, plan, billingMethod, verificationMethod })
-          });
-
-          const rawText = await response.text();
-          let result = {};
-          try {
-            result = rawText ? JSON.parse(rawText) : {};
-          } catch (error) {
-            throw new Error(`Server returned an invalid response (${response.status}).`);
-          }
-
-          if (!response.ok || result.ok === false) {
-            throw new Error(result.error || 'Sign up failed.');
-          }
-
-          successBox.textContent = result.requiresVerification
-            ? 'Account created. Check your verification code...'
-            : 'Account created successfully. You can now log in.';
-          successBox.classList.add('show');
-          form.reset();
-
-          setTimeout(() => {
-            const destination = result.requiresVerification
-              ? `${apiBase}/verify-account.html?username=${encodeURIComponent(username)}&channel=${encodeURIComponent(result.channel || verificationMethod)}`
-              : `${apiBase}/login.html`;
-            window.location.href = destination;
-          }, 1200);
-        } catch (error) {
-          errorBox.textContent = error.message || 'Unable to create account. Please try again.';
-          errorBox.classList.add('show');
-        } finally {
-          signupButton.disabled = false;
-          signupButton.textContent = 'Sign up';
-        }
-      });
-    </script>
+    <script src="registration-validation.js?v=20261014"></script>
+    <script src="signup.js?v=20261014"></script>
   </body>
 </html>

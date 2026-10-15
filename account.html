@@ -170,6 +170,33 @@
         font-weight: 700;
       }
       a { color: var(--primary); }
+
+      /* Keep account details readable without sideways scrolling. */
+      body { line-height: 1.5; }
+      .wrap { width: 100%; }
+      .card, .panel, .profile-grid > div { min-width: 0; }
+      .card { overflow-wrap: anywhere; }
+      .value { line-height: 1.4; overflow-wrap: anywhere; }
+      .topbar { flex-wrap: wrap; }
+      h1, h2 { line-height: 1.25; }
+      button, input, select { font-family: inherit; }
+      button { min-height: 44px; white-space: normal; }
+      input, select { min-width: 0; max-width: 100%; min-height: 48px; }
+      .logout { flex-shrink: 0; }
+      @media (max-width: 680px) {
+        .wrap { margin: 16px auto; padding: 0 12px; }
+        .card { padding: 20px; }
+        .grid, .profile-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+        .panel { padding: 16px; }
+        .value { font-size: 1.125rem; }
+        h1 { font-size: 1.5rem; }
+        h2 { font-size: 1.25rem; }
+        .payment-box { padding: 16px; }
+        .profile-box button, .password-box button, .payment-box button, .danger {
+          width: 100%;
+          font-size: 1rem;
+        }
+      }
     </style>
   </head>
   <body>
@@ -264,9 +291,9 @@
             <label for="currentPassword">Current password</label>
             <input id="currentPassword" type="password" required autocomplete="current-password" />
             <label for="newPassword">New password</label>
-            <input id="newPassword" type="password" minlength="8" required autocomplete="new-password" />
+            <input id="newPassword" type="password" minlength="6" required autocomplete="new-password" />
             <label for="confirmNewPassword">Confirm new password</label>
-            <input id="confirmNewPassword" type="password" minlength="8" required autocomplete="new-password" />
+            <input id="confirmNewPassword" type="password" minlength="6" required autocomplete="new-password" />
             <button type="submit">Change password</button>
           </form>
           <p class="password-message" id="passwordMessage"></p>
@@ -286,7 +313,7 @@
         }
 
         const data = await response.json();
-        document.getElementById('welcomeText').innerHTML = `Welcome, <strong>${data.user.username}</strong>. Your account is ready.`;
+        document.getElementById('welcomeText').textContent = `Welcome, ${data.user.username}. Your account is ready.`;
         document.getElementById('fullName').textContent = data.user.fullName || 'Not provided';
         document.getElementById('email').textContent = data.user.email || 'Not provided';
         document.getElementById('phone').textContent = data.user.phone || 'Not provided';
@@ -309,7 +336,7 @@
           const data = await response.json();
           if (!data.payfastConfigured) {
             button.disabled = true;
-            message.textContent = 'Secure payment is not configured yet. Add PayFast merchant credentials on the server.';
+            message.textContent = 'Online payment is currently unavailable. Please contact support to arrange payment.';
           }
         } catch (error) {
           message.textContent = 'Unable to check payment service status.';

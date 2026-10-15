@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vulithuba Admin Login</title>
+    <title>Vulithuba Login</title>
     <style>
       :root {
         --bg: #f4f8ff;
@@ -86,22 +86,24 @@
   </head>
   <body>
     <div class="panel">
-      <h1>Admin Login</h1>
-      <p>Secure access to Vulithuba customer leads.</p>
+      <h1>Welcome to Vulithuba</h1>
+      <p>Log in to manage your plan, account, and billing.</p>
 
       <div id="errorBox" class="error" role="alert"></div>
 
       <form id="loginForm">
-        <div>
+        <div id="usernameBox">
           <label for="username">Username</label>
           <input id="username" name="username" type="text" autocomplete="username" required />
         </div>
 
-        <div>
+        <div id="passwordBox">
           <label for="password">Password</label>
           <input id="password" name="password" type="password" autocomplete="current-password" required />
         </div>
 
+        
+        <div id="codeBox" hidden><label for="loginCode">Verification code</label><input id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" /><p id="codeMessage" role="status"></p></div>
         <button type="submit" id="loginButton">Login</button>
       </form>
 
@@ -121,17 +123,19 @@
         window.location.replace('http://127.0.0.1:3000/login.html');
       }
       const apiBase = window.location.protocol === 'file:' ? 'http://127.0.0.1:3000' : window.location.origin;
-      const apiBases = [...new Set([apiBase, 'http://127.0.0.1:3000', 'http://localhost:3000'])];
+      const apiBases = [apiBase];
       const form = document.getElementById('loginForm');
       const errorBox = document.getElementById('errorBox');
       const loginButton = document.getElementById('loginButton');
 
+      let challenge = '';
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
+        if (loginButton.disabled) return;
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
 
-        if (!username || !password) {
+        if (!challenge && (!username || !password)) {
           errorBox.textContent = 'Please fill in both username and password.';
           errorBox.classList.add('show');
           return;
@@ -147,11 +151,11 @@
           for (const candidateBase of apiBases) {
             requestBase = candidateBase;
             try {
-              response = await fetch(`${requestBase}/api/login`, {
+              response = await fetch(`${requestBase}${challenge ? '/api/verify-login' : '/api/login'}`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify(challenge ? { challenge, code: document.getElementById('loginCode').value.trim() } : { username, password, channel: 'sms' })
               });
             } catch (error) {
               if (candidateBase === apiBases[apiBases.length - 1]) throw error;
@@ -176,13 +180,24 @@
             throw new Error(result.error || 'Login failed.');
           }
 
+          if (result.requiresLoginVerification && result.challenge) {
+            challenge = result.challenge;
+            document.getElementById('password').value = '';
+            document.getElementById('password').required = false;
+            document.getElementById('codeBox').hidden = false;
+            document.getElementById('usernameBox').hidden = true;
+            document.getElementById('passwordBox').hidden = true;
+            document.getElementById('loginCode').required = true;
+            document.getElementById('codeMessage').textContent = result.message;
+            document.getElementById('loginCode').focus(); return;
+          }
           window.location.href = `${requestBase}/account.html`;
         } catch (error) {
           errorBox.textContent = error.message || 'Unable to login. Please try again.';
           errorBox.classList.add('show');
         } finally {
           loginButton.disabled = false;
-          loginButton.textContent = 'Login';
+          loginButton.textContent = challenge ? 'Verify code' : 'Login';
         }
       });
     </script>
