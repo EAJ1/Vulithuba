@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Vulithuba | Your connection</title>
+  <link rel="stylesheet" href="mobile.css">
+  <script src="mobile.js" defer></script>
+</head>
+<body>
+  <main id="mobile-dashboard">
+    <section class="welcome">
+      <p class="eyebrow">CONNECTED TO WHAT MATTERS</p>
+      <h1 id="greeting">Your connection.<br>Your way.</h1>
+      <p id="intro">Welcome to Vulithuba. Find your next plan or manage the connection you already love.</p>
+      <div class="welcome-actions" id="guest-actions" hidden>
+        <a class="button white" href="login.html?mobile=1">Log in</a>
+        <a class="button outline" href="signup.html?mobile=1">Create account</a>
+      </div>
+      <a class="button white" id="customer-action" href="account.html?mobile=1" hidden>Manage my account</a>
+    </section>
+    <p class="notice" id="account-notice" role="status">Checking your account…</p>
+    <button class="retry" id="retry" hidden>Try again</button>
+    <section id="customer-overview" hidden aria-label="Your account overview">
+      <div class="section-heading"><h2>Your connection</h2><span class="tag">MY ACCOUNT</span></div>
+      <article class="plan-summary">
+        <span class="icon" aria-hidden="true">↗</span>
+        <div><p class="muted">Current plan</p><h3 id="customer-plan"></h3><p id="plan-detail" class="muted"></p></div>
+        <a href="account.html?mobile=1" aria-label="Manage your plan">Manage →</a>
+      </article>
+      <div class="summary-grid">
+        <article class="summary"><p class="muted">Billing status</p><strong id="billing-status"></strong><a href="account.html?mobile=1">View billing →</a></article>
+        <article class="summary"><p class="muted">Payment method</p><strong id="billing-method"></strong><a href="account.html?mobile=1">Manage details →</a></article>
+      </div>
+    </section>
+    <section aria-label="Quick actions">
+      <div class="section-heading"><h2>How can we help?</h2></div>
+      <div class="action-grid">
+        <a class="action" href="index.html?mobile=1#plans"><span aria-hidden="true">↗</span><strong>Explore plans</strong><small>Find your perfect fit</small></a>
+        <a class="action" href="index.html?mobile=1#coverage"><span aria-hidden="true">◎</span><strong>Coverage</strong><small>See where we connect</small></a>
+        <a class="action" href="index.html?mobile=1#services"><span aria-hidden="true">⌁</span><strong>Our services</strong><small>Home, mobile & business</small></a>
+        <a class="action" href="index.html?mobile=1#contact"><span aria-hidden="true">♡</span><strong>Get support</strong><small>Talk to our team</small></a>
+      </div>
+    </section>
+    <section class="help-card">
+      <div><span class="eyebrow">HERE WHEN YOU NEED US</span><h2>A little help goes a long way.</h2><p>Questions about your plan or getting connected? Our team is ready to help.</p></div>
+      <a class="button blue" href="index.html?mobile=1#contact">Contact support →</a>
+      <p class="contact-links"><a href="tel:+27123456789">Call our team</a><span aria-hidden="true"> · </span><a href="mailto:hello@vulithuba.co.za">Send an email</a></p>
+    </section>
+    <a class="staff-link" id="staff-link" href="admin.html?mobile=1" hidden>Open staff dashboard →</a>
+  </main>
+</body>
+</html>

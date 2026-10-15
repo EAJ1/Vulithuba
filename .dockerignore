@@ -1,0 +1,9 @@
+.git
+.env
+.env.*
+node_modules
+data
+Vulithuba*
+my_mobile_app
+.tools
+*.log

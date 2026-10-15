@@ -1,0 +1,43 @@
+# Creates a paid service only when applied in your Render account.
+services:
+  - type: web
+    name: vulithuba
+    runtime: node
+    plan: starter
+    buildCommand: npm ci --omit=dev
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    numInstances: 1
+    disk:
+      name: vulithuba-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 24.21.0
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /var/data
+      - key: ADMIN_INITIAL_PASSWORD
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_TO
+        sync: false
+      - key: SMS_PROVIDER
+        value: clicksend
+      - key: CLICKSEND_USERNAME
+        sync: false
+      - key: CLICKSEND_API_KEY
+        sync: false
+      - key: ADMIN_VERIFICATION_EMAIL
+        sync: false
