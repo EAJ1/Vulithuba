@@ -198,6 +198,7 @@ const MIME_TYPES = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.ico': 'image/x-icon',
+  '.apk': 'application/vnd.android.package-archive',
   '.txt': 'text/plain; charset=utf-8'
 };
 
@@ -236,7 +237,7 @@ function serveStaticFile(res, requestPath) {
   const publicFiles = new Set([
     'index.html', 'login.html', 'signup.html', 'account.html', 'admin.html',
     'forgot-password.html', 'reset-password.html', 'verify-account.html', 'mobile.html',
-    'styles.css', 'mobile.css', 'script.js', 'script-v2.js', 'script-v3.js', 'mobile.js', 'registration-validation.js', 'signup.js'
+    'Vulithuba-test-v6.apk', 'Vulithuba-test-v7.apk', 'styles.css', 'mobile.css', 'script.js', 'script-v2.js', 'script-v3.js', 'mobile.js', 'registration-validation.js', 'signup.js'
   ]);
   const relativePath = requestPath === '/' ? 'index.html' : requestPath.replace(/^\//, '');
   if (!publicFiles.has(relativePath)) {

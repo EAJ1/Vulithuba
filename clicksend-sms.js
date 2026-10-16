@@ -21,7 +21,18 @@ function createClickSendSender(env, fetchImpl = fetch) {
         }
         const result = await response.json();
         if (result.response_code !== 'SUCCESS' || !Array.isArray(result.data?.messages) || result.data.messages.length !== 1 || result.data.messages[0].status !== 'SUCCESS' || !result.data.messages[0].message_id) {
-          return { sent: false, reason: 'ClickSend did not accept the SMS for delivery.' };
+          const code = String(result.data?.messages?.[0]?.status || result.response_code || 'UNKNOWN');
+          const reasons = {
+            INSUFFICIENT_CREDIT: 'ClickSend SMS credit is insufficient for this destination. Add credit in the ClickSend dashboard.',
+            COUNTRY_NOT_ENABLED: 'ClickSend has not enabled SMS to this country. Contact ClickSend support to enable the destination.',
+            ACCOUNT_NOT_ACTIVATED: 'ClickSend requires account activation before sending SMS. Complete activation in its dashboard.',
+            INVALID_CREDENTIALS: 'ClickSend rejected the API credentials. Check the API username and key.',
+            INVALID_RECIPIENT: 'ClickSend rejected this phone number. Check the international number saved on your account.',
+            INVALID_SENDER_ID: 'ClickSend rejected the SMS sender. Contact ClickSend support to confirm the approved sender.',
+            THROTTLED: 'ClickSend temporarily limited this request. Wait a minute before trying again.'
+          };
+          console.warn(`ClickSend SMS rejected: ${Object.hasOwn(reasons, code) ? code : 'UNRECOGNIZED_RESPONSE'}`);
+          return { sent: false, reason: reasons[code] || 'ClickSend did not accept the SMS. Check the latest SMS API response in the ClickSend dashboard.' };
         }
         // Queue acceptance does not confirm delivery to the handset.
         return { sent: true };

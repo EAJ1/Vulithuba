@@ -21,3 +21,10 @@ test('ClickSend rejects missing credentials, invalid numbers, provider failures 
   }
   assert.equal((await createClickSendSender(settings, unexpected).send('code', '+27821234567')).sent, false);
 });
+
+test('ClickSend explains message rejection without exposing the provider response', async () => {
+  const sender = createClickSendSender(settings, async () => ({ ok: true, json: async () => ({response_code:'SUCCESS',data:{messages:[{status:'COUNTRY_NOT_ENABLED'}]}}) }));
+  const result = await sender.send('code', '+27821234567');
+  assert.equal(result.sent, false);
+  assert.match(result.reason, /not enabled SMS to this country/);
+});
